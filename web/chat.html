@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>زعفران · WhatsApp Simulator</title>
+<style>
+  :root{
+    --bg:#0A0D12;--panel:#0F1A14;--bot:#1A2029;--user:#1E3329;--green:#34D399;
+    --text:#E8ECF1;--muted:#7D8896;--border:#1F3329;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--text);
+       height:100vh;display:grid;place-items:center}
+  .phone{width:420px;max-width:100vw;height:92vh;background:var(--panel);border:1px solid var(--border);
+         border-radius:22px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .head{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#11231a;border-bottom:1px solid var(--border)}
+  .avatar{width:40px;height:40px;border-radius:50%;background:var(--green);color:#0A0D12;font-weight:800;
+          display:grid;place-items:center;font-size:18px}
+  .head .name{font-weight:600}
+  .head .status{font-size:12px;color:var(--green)}
+  .feed{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .row{display:flex}
+  .row.user{justify-content:flex-start}
+  .row.bot{justify-content:flex-start}
+  .bubble{max-width:80%;padding:9px 13px;border-radius:14px;font-size:14.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+  .user .bubble{background:var(--user);margin-inline-start:auto;border-end-end-radius:4px}
+  .bot .bubble{background:var(--bot);border-end-start-radius:4px}
+  .ltr{direction:ltr;text-align:left}
+  .meta{font-size:10px;color:var(--muted);margin-top:4px;font-family:monospace}
+  .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .chip{background:transparent;border:1px solid var(--green);color:var(--green);padding:6px 10px;
+        border-radius:8px;font-size:12.5px;cursor:pointer;transition:.15s}
+  .chip:hover{background:var(--green);color:#0A0D12}
+  .list{margin-top:8px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .list .li{padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+  .list .li:last-child{border-bottom:none}
+  .list .li:hover{background:#16261d}
+  .list .li .d{color:var(--green);font-size:13px;white-space:nowrap}
+  .compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:#11231a}
+  .compose input{flex:1;background:#0A0D12;border:1px solid var(--border);border-radius:20px;
+                 padding:10px 14px;color:var(--text);font-size:14px;outline:none}
+  .compose button{background:var(--green);border:none;color:#0A0D12;font-weight:700;border-radius:50%;
+                  width:42px;height:42px;cursor:pointer;font-size:18px}
+  .hint{font-size:11px;color:var(--muted);text-align:center;padding:6px}
+  .typing{font-size:12px;color:var(--muted);padding:4px 8px}
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="head">
+      <div class="avatar">ز</div>
+      <div>
+        <div class="name">مطعم زعفران</div>
+        <div class="status">● متصل · بيرد في ثواني</div>
+      </div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <div class="hint">جرّب: «عايز شاورما فراخ» · «المنيو» · «فين الأوردر؟» · «احجز ترابيزة ٤ افراد بكرة الساعة ٨»</div>
+    <div class="compose">
+      <input id="input" placeholder="اكتب رسالتك..." autocomplete="off" />
+      <button id="send">➤</button>
+    </div>
+  </div>
+
+<script>
+const feed = document.getElementById('feed');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const FROM = localStorage.getItem('sr_phone') || ('+2010' + Math.floor(10000000 + Math.random()*89999999));
+localStorage.setItem('sr_phone', FROM);
+
+function addUser(text){
+  const row = document.createElement('div'); row.className = 'row user';
+  row.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+  feed.appendChild(row); scroll();
+}
+function escapeHtml(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function linkify(s){return escapeHtml(s).replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" style="color:#34D399">$1</a>');}
+
+function addBot(msg){
+  const row = document.createElement('div'); row.className = 'row bot';
+  const dirClass = msg.rtl ? '' : 'ltr';
+  let html = `<div><div class="bubble ${dirClass}">${linkify(msg.text)}`;
+  if(msg.buttons && msg.buttons.length){
+    html += `<div class="btns">` + msg.buttons.map(b=>`<button class="chip" data-id="${b.id}">${escapeHtml(b.title)}</button>`).join('') + `</div>`;
+  }
+  if(msg.list_sections && msg.list_sections.length){
+    for(const sec of msg.list_sections){
+      html += `<div class="list">` + sec.rows.map(r=>`<div class="li" data-id="${r.id}"><span>${escapeHtml(r.title)}</span><span class="d">${escapeHtml(r.description||'')}</span></div>`).join('') + `</div>`;
+    }
+  }
+  html += `</div>`;
+  if(msg.meta && msg.meta.tools && msg.meta.tools.length){
+    html += `<div class="meta">tools: ${msg.meta.tools.join(', ')}</div>`;
+  }
+  html += `</div>`;
+  row.innerHTML = html;
+  feed.appendChild(row);
+  row.querySelectorAll('.chip,.li').forEach(el=>{
+    el.addEventListener('click',()=>sendInteractive(el.dataset.id, el.textContent.trim()));
+  });
+  scroll();
+}
+function scroll(){ feed.scrollTop = feed.scrollHeight; }
+
+async function post(body){
+  const res = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return res.json();
+}
+async function sendText(){
+  const text = input.value.trim(); if(!text) return;
+  input.value=''; addUser(text);
+  const out = await post({type:'text', text, from:FROM});
+  addBot(out);
+}
+async function sendInteractive(id, label){
+  addUser(label);
+  const out = await post({type:'interactive', interactive_id:id, from:FROM});
+  addBot(out);
+}
+
+sendBtn.addEventListener('click', sendText);
+input.addEventListener('keydown', e=>{ if(e.key==='Enter') sendText(); });
+
+addBot({text:'أهلاً بيك في مطعم زعفران 👋 تحب تطلب إيه النهاردة؟', rtl:true, buttons:[{id:'add_more',title:'اعرض المنيو'}]});
+</script>
+</body>
+</html>

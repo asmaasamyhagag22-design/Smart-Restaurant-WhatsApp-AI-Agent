@@ -1,0 +1,14 @@
+-r requirements.txt
+
+# ---- Testing ----
+pytest>=8.0
+pytest-asyncio>=0.23
+pytest-cov>=5.0
+anyio>=4.3
+
+# ---- Lint / type ----
+ruff>=0.5
+mypy>=1.10
+
+# ---- Fixtures ----
+faker>=25.0

@@ -1,0 +1,156 @@
+[
+  {
+    "sku": "SHWRM-CHK",
+    "name_ar": "شاورما فراخ",
+    "name_en": "Chicken Shawarma",
+    "description": "شاورما فراخ مشوية مع ثومية وطحينة في عيش سوري",
+    "category": "sandwiches",
+    "price_cents": 8500,
+    "allergens": ["sesame", "gluten"],
+    "diet_tags": ["halal"],
+    "spice_level": 1
+  },
+  {
+    "sku": "SHWRM-BF",
+    "name_ar": "شاورما لحمة",
+    "name_en": "Beef Shawarma",
+    "description": "شاورما لحمة بلدي مع طحينة ومخلل",
+    "category": "sandwiches",
+    "price_cents": 9500,
+    "allergens": ["sesame", "gluten"],
+    "diet_tags": ["halal"],
+    "spice_level": 1
+  },
+  {
+    "sku": "BRGR-BF",
+    "name_ar": "برجر لحمة",
+    "name_en": "Beef Burger",
+    "description": "برجر لحمة مشوي مع جبنة شيدر وصوص خاص",
+    "category": "burgers",
+    "price_cents": 11000,
+    "allergens": ["gluten", "dairy", "egg"],
+    "diet_tags": ["halal"],
+    "spice_level": 1
+  },
+  {
+    "sku": "BRGR-CHK",
+    "name_ar": "برجر فراخ",
+    "name_en": "Chicken Burger",
+    "description": "برجر فراخ كرسبي مع خس وطماطم",
+    "category": "burgers",
+    "price_cents": 9500,
+    "allergens": ["gluten", "egg"],
+    "diet_tags": ["halal"],
+    "spice_level": 2
+  },
+  {
+    "sku": "FRIES-L",
+    "name_ar": "بطاطس كبيرة",
+    "name_en": "Large Fries",
+    "description": "بطاطس مقلية مقرمشة",
+    "category": "sides",
+    "price_cents": 3500,
+    "allergens": [],
+    "diet_tags": ["vegetarian", "vegan", "halal"],
+    "spice_level": 0
+  },
+  {
+    "sku": "COKE",
+    "name_ar": "كوكاكولا",
+    "name_en": "Coca-Cola",
+    "description": "مشروب غازي 330 مل",
+    "category": "drinks",
+    "price_cents": 1500,
+    "allergens": [],
+    "diet_tags": ["vegan", "halal"],
+    "spice_level": 0
+  },
+  {
+    "sku": "COKE-DT",
+    "name_ar": "كوكا دايت",
+    "name_en": "Diet Coke",
+    "description": "مشروب غازي دايت 330 مل",
+    "category": "drinks",
+    "price_cents": 1500,
+    "allergens": [],
+    "diet_tags": ["vegan", "halal"],
+    "spice_level": 0
+  },
+  {
+    "sku": "LMND-MINT",
+    "name_ar": "ليمون بالنعناع",
+    "name_en": "Mint Lemonade",
+    "description": "عصير ليمون طازة بالنعناع",
+    "category": "drinks",
+    "price_cents": 4500,
+    "allergens": [],
+    "diet_tags": ["vegan", "vegetarian", "halal"],
+    "spice_level": 0
+  },
+  {
+    "sku": "MANDI-LMB",
+    "name_ar": "مندي لحم (كبير)",
+    "name_en": "Lamb Mandi (large)",
+    "description": "مندي لحم ضاني مع رز بالزعفران وخضار مشوي",
+    "category": "platters",
+    "price_cents": 24000,
+    "allergens": ["nuts"],
+    "diet_tags": ["halal"],
+    "spice_level": 2
+  },
+  {
+    "sku": "MANDI-CHK",
+    "name_ar": "مندي فراخ",
+    "name_en": "Chicken Mandi",
+    "description": "مندي فراخ مع رز بالزعفران",
+    "category": "platters",
+    "price_cents": 18000,
+    "allergens": ["nuts"],
+    "diet_tags": ["halal"],
+    "spice_level": 1
+  },
+  {
+    "sku": "HUMMUS",
+    "name_ar": "حمص",
+    "name_en": "Hummus",
+    "description": "حمص بالطحينة وزيت الزيتون",
+    "category": "appetizers",
+    "price_cents": 3000,
+    "allergens": ["sesame"],
+    "diet_tags": ["vegan", "vegetarian", "halal"],
+    "spice_level": 0
+  },
+  {
+    "sku": "FALAFEL",
+    "name_ar": "طعمية",
+    "name_en": "Falafel",
+    "description": "طعمية مصري مقرمشة (5 قطع)",
+    "category": "appetizers",
+    "price_cents": 2500,
+    "allergens": ["gluten", "sesame"],
+    "diet_tags": ["vegan", "vegetarian", "halal"],
+    "spice_level": 1
+  },
+  {
+    "sku": "GRLD-VEG",
+    "name_ar": "خضار مشوي",
+    "name_en": "Grilled Vegetables",
+    "description": "تشكيلة خضار مشوي بالأعشاب",
+    "category": "sides",
+    "price_cents": 4000,
+    "allergens": [],
+    "diet_tags": ["vegan", "vegetarian", "halal"],
+    "spice_level": 0
+  },
+  {
+    "sku": "OM-ALI",
+    "name_ar": "أم علي",
+    "name_en": "Om Ali",
+    "description": "حلى مصري ساخن بالمكسرات والقشطة",
+    "category": "desserts",
+    "price_cents": 5500,
+    "allergens": ["nuts", "dairy", "gluten"],
+    "diet_tags": ["vegetarian", "halal"],
+    "spice_level": 0
+  }
+]
