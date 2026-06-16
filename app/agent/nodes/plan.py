@@ -53,6 +53,8 @@ async def plan_node(state: ConvState) -> dict[str, Any]:
             return {"plan": [ToolCall(name="create_payment", args={"method": "cod"})]}
         if iid == "pay_card":
             return {"plan": [ToolCall(name="create_payment", args={"method": "card"})]}
+        if iid == "show_menu":
+            return {"plan": [ToolCall(name="query_menu", args={"query": "المنيو", "k": 8})]}
         if iid in ("confirm_order", "add_more"):
             return {"plan": []}  # respond handles these
 

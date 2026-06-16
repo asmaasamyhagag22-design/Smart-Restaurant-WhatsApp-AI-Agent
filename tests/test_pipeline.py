@@ -8,6 +8,13 @@ async def test_single_item_order(say):
     assert {b.id for b in out.buttons} >= {"confirm_order", "cancel_order"}
 
 
+async def test_bare_dish_name_orders(say):
+    # typing just the dish name (no "عايز") should add it to the cart
+    out = await say("شاورما فراخ", frm="+2010021")
+    assert "شاورما فراخ" in out.text
+    assert "85" in out.text
+
+
 async def test_multi_item_order(say):
     out = await say("عايز برجر لحمة وبطاطس وكوكا", frm="+2010002")
     assert "برجر" in out.text and "بطاطس" in out.text

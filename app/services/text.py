@@ -73,17 +73,33 @@ def extract_quantity(text: str, default: int = 1) -> int:
     return default
 
 
+SMALLTALK_KEYWORDS = [
+    "هاي", "هلا", "اهلا", "ازيك", "ازيكم", "ازي", "السلام", "صباح", "مساء",
+    "شكر", "متشكر", "تسلم", "باي", "عامل ايه",
+    "hi", "hello", "hey", "thanks", "thank", "bye", "good morning", "good evening",
+]
+
+
 def guess_intent(text: str) -> Intent:
-    """Keyword-based intent. Order matters: more specific intents win."""
+    """Keyword-based intent. Order matters: more specific intents win.
+
+    A bare dish name ("شاورما فراخ") has no order verb, so anything that isn't a
+    recognized intent or a greeting defaults to ORDER — the menu lookup then
+    either fulfills it or reports it's not found.
+    """
     t = normalize_arabizi(text.lower())
-    for intent in (Intent.PAY, Intent.TRACK, Intent.RESERVE, Intent.SUPPORT, Intent.BROWSE, Intent.ORDER):
+    for intent in (Intent.PAY, Intent.TRACK, Intent.RESERVE, Intent.SUPPORT, Intent.BROWSE):
         for kw in INTENT_KEYWORDS[intent]:
             if normalize_arabizi(kw.lower()) in t:
                 return intent
-    # default: short greetings → smalltalk, else browse
-    if len(t.split()) <= 2:
-        return Intent.SMALLTALK
-    return Intent.BROWSE
+    for kw in INTENT_KEYWORDS[Intent.ORDER]:
+        if normalize_arabizi(kw.lower()) in t:
+            return Intent.ORDER
+    for kw in SMALLTALK_KEYWORDS:
+        if normalize_arabizi(kw.lower()) in t:
+            return Intent.SMALLTALK
+    # default: treat remaining text as a food request (bare dish name)
+    return Intent.ORDER
 
 
 _ORDER_STOP = {

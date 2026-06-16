@@ -20,6 +20,7 @@ _BUTTON_INTENT: dict[str, Intent] = {
     "pay_cod": Intent.PAY,
     "pay_wallet": Intent.PAY,
     "add_more": Intent.BROWSE,
+    "show_menu": Intent.BROWSE,
     "cancel_order": Intent.SMALLTALK,
 }
 

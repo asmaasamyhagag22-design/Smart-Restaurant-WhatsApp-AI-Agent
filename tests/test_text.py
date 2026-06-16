@@ -34,6 +34,18 @@ def test_guess_intent():
     assert guess_intent("المنيو") == Intent.BROWSE
 
 
+def test_guess_intent_bare_dish_is_order():
+    # a bare dish name (no order verb) should still be treated as an order
+    assert guess_intent("شاورما فراخ") == Intent.ORDER
+    assert guess_intent("برجر لحمة") == Intent.ORDER
+
+
+def test_guess_intent_greetings():
+    assert guess_intent("ازيك") == Intent.SMALLTALK
+    assert guess_intent("هاي") == Intent.SMALLTALK
+    assert guess_intent("hello") == Intent.SMALLTALK
+
+
 def test_parse_order_lines_multi():
     lines = parse_order_lines("عايز برجر لحمة وبطاطس وكوكا")
     phrases = [line["phrase"] for line in lines]
