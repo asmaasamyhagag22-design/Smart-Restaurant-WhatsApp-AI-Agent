@@ -199,9 +199,25 @@ async def respond_node(state: ConvState) -> dict[str, Any]:
         return out(_menu_list_message(matches, to, lang, meta, header=header))
 
     # ── smalltalk / fallback (LLM prose) ──────────────────────────────
+    if ar:
+        system = (
+            "[task:respond]\n"
+            "إنت مساعد مطعم زعفران على واتساب. ردّك بالعامية المصرية، قصير جداً وودود "
+            "(سطر أو اتنين)، ووجّه العميل إنه يطلب أكل أو يشوف المنيو. "
+            "ممنوع تخترع أصناف أو أسعار من عندك."
+        )
+    else:
+        system = (
+            "[task:respond]\n"
+            "You are Zaffran restaurant's WhatsApp assistant. Reply in short, friendly "
+            "English (one or two lines) and steer the customer to order or view the menu. "
+            "Never invent menu items or prices."
+        )
     res = await get_llm().complete(
-        system="[task:respond]",
+        system=system,
         messages=[{"role": "user", "content": state.text_norm or state.inbound.text}],
         model=settings.reflect_model,
+        temperature=0.5,
     )
-    return out(OutboundMessage(to=to, text=res.text, rtl=ar, meta=meta))
+    buttons = [Button(id="show_menu", title="اعرض المنيو" if ar else "View menu")]
+    return out(OutboundMessage(to=to, text=res.text or "", rtl=ar, buttons=buttons, meta=meta))
