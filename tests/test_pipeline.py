@@ -35,6 +35,16 @@ async def test_pay_flow_cod(say):
     assert "كاش" in done.text or "أوردر" in done.text
 
 
+async def test_cart_resets_after_payment(say):
+    await say("عايز شاورما فراخ", frm="+2010030")
+    await say(iid="confirm_order", frm="+2010030")
+    await say(iid="pay_cod", frm="+2010030")
+    # the next order must start fresh — not pile onto the paid one
+    out = await say("عايز كوكا", frm="+2010030")
+    assert "كوكا" in out.text
+    assert "شاورما" not in out.text
+
+
 async def test_track_after_order(say):
     await say("عايز برجر فراخ", frm="+2010005")
     await say(iid="confirm_order", frm="+2010005")

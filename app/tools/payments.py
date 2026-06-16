@@ -7,6 +7,7 @@ from typing import Any
 from app.agent.state import ConvState
 from app.config import settings
 from app.deps import get_psp, get_repos
+from app.schemas.domain import Cart
 from app.schemas.entities import CustomerRecord, OrderRecord
 from app.schemas.enums import Fulfillment, OrderStatus, PaymentStatus
 from app.tools.base import ToolOutput, fail, ok
@@ -38,7 +39,9 @@ async def create_payment(args: dict[str, Any], state: ConvState) -> ToolOutput:
     order = await repos.orders.create(order)
 
     if method == "cod":
+        # order is placed → start the conversation's cart fresh
         return ok(
+            cart=Cart(),
             method="cod",
             order_id=order.id,
             reference=reference,
@@ -59,6 +62,7 @@ async def create_payment(args: dict[str, Any], state: ConvState) -> ToolOutput:
         description=f"Order {reference}",
     )
     return ok(
+        cart=Cart(),  # order placed (pending payment) → reset the cart
         method=method,
         order_id=order.id,
         reference=reference,
