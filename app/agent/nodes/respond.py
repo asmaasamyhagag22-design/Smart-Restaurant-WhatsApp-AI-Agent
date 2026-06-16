@@ -103,11 +103,6 @@ async def respond_node(state: ConvState) -> dict[str, Any]:
         )
         return {"outbound": OutboundMessage(to=to, text=text, rtl=ar, meta=meta), "escalate": True}
 
-    # ── add-more prompt ───────────────────────────────────────────────
-    if iid == "add_more":
-        text = "تحب تضيف إيه؟ اكتبلي اسم الأكل 😋" if ar else "What would you like to add? Type the item 😋"
-        return out(OutboundMessage(to=to, text=text, rtl=ar, meta=meta))
-
     # ── payment result ────────────────────────────────────────────────
     if "create_payment" in tr:
         r = tr["create_payment"]

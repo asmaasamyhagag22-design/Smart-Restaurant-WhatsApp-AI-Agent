@@ -53,10 +53,10 @@ async def plan_node(state: ConvState) -> dict[str, Any]:
             return {"plan": [ToolCall(name="create_payment", args={"method": "cod"})]}
         if iid == "pay_card":
             return {"plan": [ToolCall(name="create_payment", args={"method": "card"})]}
-        if iid == "show_menu":
+        if iid in ("show_menu", "add_more"):
             return {"plan": [ToolCall(name="query_menu", args={"query": "المنيو", "k": 8})]}
-        if iid in ("confirm_order", "add_more"):
-            return {"plan": []}  # respond handles these
+        if iid == "confirm_order":
+            return {"plan": []}  # respond handles this
 
     intent = state.intent
     plan: list[ToolCall] = []

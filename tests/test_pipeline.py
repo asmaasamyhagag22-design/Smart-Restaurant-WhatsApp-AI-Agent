@@ -74,3 +74,9 @@ async def test_menu_browse_list(say):
     out = await say("المنيو", frm="+2010009")
     assert out.list_sections
     assert out.list_sections[0].rows
+
+
+async def test_add_more_shows_menu(say):
+    await say("عايز شاورما فراخ", frm="+2010041")
+    out = await say(iid="add_more", frm="+2010041")
+    assert out.list_sections and out.list_sections[0].rows
