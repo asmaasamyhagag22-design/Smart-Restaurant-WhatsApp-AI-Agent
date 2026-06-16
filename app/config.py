@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # ── Provider selection ────────────────────────────────────────────
     store_backend: Literal["memory", "sql"] = "memory"
-    llm_provider: Literal["anthropic", "mock"] = "mock"
+    llm_provider: Literal["anthropic", "vertex", "gemini", "mock"] = "mock"
     vector_provider: Literal["memory", "pgvector", "pinecone"] = "memory"
     channel_provider: Literal["local", "whatsapp"] = "local"
     psp_provider: Literal["mock", "paymob", "stripe"] = "mock"
@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     # Optional OpenAI key (only for embed_provider=openai / stt_provider=openai)
     openai_api_key: str | None = None
+    # Google Vertex AI (when llm_provider=vertex). Auth uses Application Default
+    # Credentials — no API key. Model ids must be Vertex-style: model@version.
+    gcp_project: str | None = None
+    vertex_region: str = "us-east5"
+    # Gemini Developer API key (alternative to Vertex for llm_provider=gemini)
+    google_api_key: str | None = None
     intent_model: str = "claude-haiku-4-5-20251001"
     plan_model: str = "claude-sonnet-4-6"
     reflect_model: str = "claude-sonnet-4-6"

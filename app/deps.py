@@ -25,12 +25,38 @@ log = get_logger("deps")
 
 @lru_cache
 def get_llm() -> BaseLLM:
-    if settings.llm_provider == "anthropic" and settings.anthropic_api_key:
-        from app.providers.llm_anthropic import AnthropicLLM
+    provider = settings.llm_provider
+    if provider == "gemini":
+        if not (settings.gcp_project or settings.google_api_key):
+            log.error("llm_provider=gemini but neither GCP_PROJECT nor GOOGLE_API_KEY set; using mock")
+        else:
+            try:
+                from app.providers.llm_gemini import GeminiLLM
 
-        return AnthropicLLM()
-    if settings.llm_provider == "anthropic":
-        log.warning("llm_provider=anthropic but ANTHROPIC_API_KEY missing; using mock")
+                return GeminiLLM()
+            except Exception as e:  # missing google-genai / bad creds
+                log.error("gemini_llm_init_failed; using mock", error=str(e)[:200])
+    elif provider == "vertex":
+        if not settings.gcp_project:
+            log.error("llm_provider=vertex but GCP_PROJECT is missing; using mock")
+        else:
+            try:
+                from app.providers.llm_anthropic import VertexLLM
+
+                return VertexLLM()
+            except Exception as e:  # missing anthropic[vertex] / bad ADC
+                log.error("vertex_llm_init_failed; using mock", error=str(e)[:200])
+    elif provider == "anthropic":
+        if not settings.anthropic_api_key:
+            log.error("llm_provider=anthropic but ANTHROPIC_API_KEY missing; using mock")
+        else:
+            try:
+                from app.providers.llm_anthropic import AnthropicLLM
+
+                return AnthropicLLM()
+            except Exception as e:
+                log.error("anthropic_llm_init_failed; using mock", error=str(e)[:200])
+
     from app.providers.llm_mock import MockLLM
 
     return MockLLM()
