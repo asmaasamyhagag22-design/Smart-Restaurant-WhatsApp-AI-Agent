@@ -9,6 +9,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,12 +44,19 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     # Optional OpenAI key (only for embed_provider=openai / stt_provider=openai)
     openai_api_key: str | None = None
-    # Google Vertex AI (when llm_provider=vertex). Auth uses Application Default
-    # Credentials — no API key. Model ids must be Vertex-style: model@version.
-    gcp_project: str | None = None
-    vertex_region: str = "us-east5"
+    # Google Vertex AI (llm_provider=vertex|gemini). Auth uses Application Default
+    # Credentials — no API key. Accepts the standard GOOGLE_CLOUD_* env names too.
+    gcp_project: str | None = Field(
+        default=None, validation_alias=AliasChoices("gcp_project", "google_cloud_project")
+    )
+    vertex_region: str = Field(
+        default="us-east5",
+        validation_alias=AliasChoices("vertex_region", "google_cloud_location"),
+    )
     # Gemini Developer API key (alternative to Vertex for llm_provider=gemini)
-    google_api_key: str | None = None
+    google_api_key: str | None = Field(
+        default=None, validation_alias=AliasChoices("google_api_key", "gemini_api_key")
+    )
     intent_model: str = "claude-haiku-4-5-20251001"
     plan_model: str = "claude-sonnet-4-6"
     reflect_model: str = "claude-sonnet-4-6"
