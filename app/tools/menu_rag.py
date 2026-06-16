@@ -1,8 +1,8 @@
 """Menu RAG (docs §06.2) — retrieve, never recite.
 
-``query_menu`` embeds the request, hybrid-filters the vector store, then validates
-matches against live inventory. ``check_allergens`` is mandatory for any allergy
-question (docs system prompt).
+Hybrid retrieval: vector similarity + lexical overlap re-rank, validated against
+live inventory. ``search_menu`` is the reusable core; ``query_menu`` is the
+tool wrapper. ``check_allergens`` is mandatory for any allergy question.
 """
 from __future__ import annotations
 
@@ -22,15 +22,19 @@ _STOP = {
 
 
 def _lexical(query: str, meta: dict[str, Any]) -> float:
-    """Token overlap between the query and an item's name/description (0..1)."""
-    q = {t for t in normalize_arabizi(query.lower()).split() if t not in _STOP and len(t) > 1}
+    """Fraction of query tokens that appear (as substrings) in an item's text.
+
+    Substring (not exact-token) match so partial words like ``كوكا`` hit
+    ``كوكاكولا`` — this is the cheap re-rank signal that makes retrieval robust
+    even when the embedding model is weak on Arabic.
+    """
+    q = [t for t in normalize_arabizi(query.lower()).split() if t not in _STOP and len(t) > 1]
     if not q:
         return 0.0
     text = normalize_arabizi(
         f"{meta.get('name_ar', '')} {meta.get('name_en', '')} {meta.get('description', '')}".lower()
     )
-    toks = set(text.split())
-    return len(q & toks) / len(q)
+    return sum(1 for t in q if t in text) / len(q)
 
 
 def _match_to_dict(meta: dict[str, Any], score: float) -> dict[str, Any]:
@@ -53,31 +57,67 @@ async def _keyword_fallback(tenant_id: str, query: str, k: int) -> list[dict[str
     """Substring match if the vector index is empty / embeddings degraded."""
     repos = get_repos()
     items = await repos.menu.list(tenant_id)
-    q = query.lower().strip()
-    scored = []
+    q = normalize_arabizi(query.lower())
+    toks = {t for t in q.split() if t not in _STOP and len(t) > 1}
+    scored: list[tuple[float, dict[str, Any]]] = []
     for it in items:
         if not it.in_stock:
             continue
-        hay = f"{it.name_ar} {it.name_en} {it.description}".lower()
-        if not q or any(tok in hay for tok in q.split()):
-            scored.append(
-                _match_to_dict(
-                    {
-                        "item_id": it.id,
-                        "sku": it.sku,
-                        "name_ar": it.name_ar,
-                        "name_en": it.name_en,
-                        "description": it.description,
-                        "price_cents": it.price_cents,
-                        "allergens": it.allergens,
-                        "diet": it.diet_tags,
-                        "spice": it.spice_level,
-                        "in_stock": it.in_stock,
-                    },
-                    score=0.5,
-                )
-            )
-    return scored[:k]
+        hay = normalize_arabizi(f"{it.name_ar} {it.name_en} {it.description}".lower())
+        overlap = len({w for w in toks if w in hay})
+        if toks and overlap == 0:
+            continue
+        meta = {
+            "item_id": it.id, "sku": it.sku, "name_ar": it.name_ar, "name_en": it.name_en,
+            "description": it.description, "price_cents": it.price_cents,
+            "allergens": it.allergens, "diet": it.diet_tags, "spice": it.spice_level,
+            "in_stock": it.in_stock,
+        }
+        scored.append((overlap or 0.1, _match_to_dict(meta, overlap)))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [m for _, m in scored[:k]]
+
+
+async def search_menu(
+    tenant_id: str,
+    query: str,
+    k: int = 5,
+    diet: list[str] | None = None,
+    exclude_allergens: list[str] | None = None,
+    max_price_cents: int | None = None,
+    spice_max: int = 3,
+) -> list[dict[str, Any]]:
+    """Reusable hybrid menu retrieval — used by query_menu and order_items."""
+    embedder = get_embedder()
+    store = get_vector_store()
+
+    flt: dict[str, Any] = {"in_stock": {"$eq": True}, "spice": {"$lte": spice_max}}
+    if diet:
+        flt["diet"] = {"$in": diet}
+    if exclude_allergens:
+        flt["allergens"] = {"$nin": exclude_allergens}
+    if max_price_cents:
+        flt["price_cents"] = {"$lte": max_price_cents}
+
+    matches: list[dict[str, Any]] = []
+    try:
+        vec = await embedder.embed(query)
+        hits = await store.query(tenant_id, vec, top_k=max(k * 3, 12), flt=flt)
+        ranked = sorted(
+            hits,
+            key=lambda h: _lexical(query, h.metadata) + 0.5 * float(h.score),
+            reverse=True,
+        )
+        matches = [
+            _match_to_dict(h.metadata, _lexical(query, h.metadata) + 0.5 * float(h.score))
+            for h in ranked[:k]
+        ]
+    except Exception:
+        matches = []
+
+    if not matches:
+        matches = await _keyword_fallback(tenant_id, query, k)
+    return matches
 
 
 async def query_menu(args: dict[str, Any], state: ConvState) -> ToolOutput:
@@ -89,37 +129,9 @@ async def query_menu(args: dict[str, Any], state: ConvState) -> ToolOutput:
         spice_max=int(args.get("spice_max", 3)),
         k=int(args.get("k", 5)),
     )
-    embedder = get_embedder()
-    store = get_vector_store()
-
-    flt: dict[str, Any] = {"in_stock": {"$eq": True}, "spice": {"$lte": q.spice_max}}
-    if q.diet:
-        flt["diet"] = {"$in": q.diet}
-    if q.exclude_allergens:
-        flt["allergens"] = {"$nin": q.exclude_allergens}
-    if q.max_price_cents:
-        flt["price_cents"] = {"$lte": q.max_price_cents}
-
-    matches: list[dict[str, Any]] = []
-    try:
-        vec = await embedder.embed(q.query)
-        hits = await store.query(state.tenant_id, vec, top_k=max(q.k * 3, 12), flt=flt)
-        # hybrid re-rank: lexical overlap dominates, vector similarity breaks ties
-        ranked = sorted(
-            hits,
-            key=lambda h: _lexical(q.query, h.metadata) + 0.5 * float(h.score),
-            reverse=True,
-        )
-        matches = [
-            _match_to_dict(h.metadata, _lexical(q.query, h.metadata) + 0.5 * float(h.score))
-            for h in ranked[: q.k]
-        ]
-    except Exception:
-        matches = []
-
-    if not matches:
-        matches = await _keyword_fallback(state.tenant_id, q.query, q.k)
-
+    matches = await search_menu(
+        state.tenant_id, q.query, q.k, q.diet, q.exclude_allergens, q.max_price_cents, q.spice_max
+    )
     return ok(matches=matches, query=q.query)
 
 

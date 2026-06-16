@@ -59,18 +59,12 @@ async def plan_node(state: ConvState) -> dict[str, Any]:
     intent = state.intent
     plan: list[ToolCall] = []
 
-    if intent in (Intent.ORDER, Intent.BROWSE):
+    if intent == Intent.ORDER:
+        if "order_items" not in tr:
+            plan = [ToolCall(name="order_items", args={"text": text})]
+    elif intent == Intent.BROWSE:
         if "query_menu" not in tr:
-            plan = [ToolCall(name="query_menu", args={"query": text, "k": 5})]
-        elif intent == Intent.ORDER and state.cart.is_empty:
-            matches = tr.get("query_menu", {}).get("matches", [])
-            if matches:
-                plan = [
-                    ToolCall(
-                        name="update_cart",
-                        args={"action": "add", "sku": matches[0]["sku"], "qty": extract_quantity(text)},
-                    )
-                ]
+            plan = [ToolCall(name="query_menu", args={"query": text, "k": 6})]
     elif intent == Intent.RESERVE:
         when = _parse_when(text)
         if when:

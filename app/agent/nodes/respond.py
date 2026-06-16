@@ -160,7 +160,24 @@ async def respond_node(state: ConvState) -> dict[str, Any]:
             return out(OutboundMessage(to=to, text=text, rtl=ar, meta=meta))
         return out(_payment_options_message(state, to, lang, meta))
 
-    # ── cart updated ──────────────────────────────────────────────────
+    # ── multi-item order added ────────────────────────────────────────
+    if "order_items" in tr:
+        r = tr["order_items"]
+        notfound = r.get("notfound") or []
+        if state.cart.is_empty:
+            base = "ملقتش الأصناف دي 😅 جرّب تكتب اسم الأكل تاني أو اطلب «المنيو»." if ar \
+                else "Couldn't find those items 😅 try again or ask for the menu."
+            return out(OutboundMessage(to=to, text=base, rtl=ar, meta=meta))
+        msg = _cart_message(state, to, lang, meta)
+        if notfound:
+            msg.text += (
+                "\n\n(ملقتش: " + "، ".join(notfound) + ")"
+                if ar
+                else "\n\n(not found: " + ", ".join(notfound) + ")"
+            )
+        return out(msg)
+
+    # ── cart updated (single tap/edit) ────────────────────────────────
     if "update_cart" in tr:
         if state.cart.is_empty:
             text = "السلة فاضية دلوقتي 🛒" if ar else "Your cart is now empty 🛒"

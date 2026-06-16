@@ -11,6 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.clock import now_utc as _utcnow
 from app.schemas.enums import (
     ConversationStatus,
     Fulfillment,
@@ -18,10 +19,6 @@ from app.schemas.enums import (
     PaymentStatus,
     ReservationStatus,
 )
-
-
-def _utcnow() -> datetime:
-    return datetime.utcnow()
 
 
 class TenantRecord(BaseModel):

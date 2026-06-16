@@ -56,6 +56,8 @@ async def _index_menu(repos: Repos, tenant: TenantRecord) -> None:
 async def seed_if_empty() -> None:
     repos = get_repos()
     tenant = await repos.tenants.get_by_slug(settings.default_tenant_slug)
+    if tenant is not None and await repos.menu.list(tenant.id):
+        return  # already seeded — keep idempotent across repeated calls
     if tenant is None:
         tenant = await repos.tenants.upsert(
             TenantRecord(

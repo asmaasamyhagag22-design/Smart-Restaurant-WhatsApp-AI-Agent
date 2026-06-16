@@ -84,3 +84,40 @@ def guess_intent(text: str) -> Intent:
     if len(t.split()) <= 2:
         return Intent.SMALLTALK
     return Intent.BROWSE
+
+
+_ORDER_STOP = {
+    "عايز", "عاوز", "اطلب", "هات", "ضيف", "اضيف", "لو", "سمحت", "فضلك", "محتاج",
+    "want", "order", "add", "get", "me", "a", "an", "the", "please", "i", "id", "like",
+}
+# split an order utterance into line items on connectors (handles attached و)
+_SEG_SPLIT = re.compile(r"\s+و|،|,|\s+مع\s+|\s+and\s+|\s+plus\s+")
+# modifier phrases: "بدون طرشي" / "من غير بصل" / "زيادة جبنة" / "no onions"
+_MOD_RE = re.compile(
+    r"(بدون|من غير|بلا|زياده|زيادة|اكسترا|extra|no|without)\s+([^\sو،,]+(?:\s+[^\sو،,]+)?)"
+)
+
+
+def parse_order_lines(text: str) -> list[dict]:
+    """Parse free-text into order lines: ``[{qty, phrase, modifiers}]``.
+
+    Handles multi-item ("شاورما وبطاطس وكولا"), quantities ("اتنين برجر")
+    and modifiers ("برجر بدون مخلل"). Best-effort for the local/mock path;
+    the production LLM planner handles the long tail.
+    """
+    t = normalize_arabizi(text)
+    lines: list[dict] = []
+    for seg in _SEG_SPLIT.split(t):
+        seg = seg.strip()
+        if not seg:
+            continue
+        qty = extract_quantity(seg, default=1)
+        mods: list[str] = []
+        phrase = _MOD_RE.sub(lambda m: mods.append(f"{m.group(1)} {m.group(2)}".strip()) or " ", seg)
+        phrase = re.sub(r"\b\d+\b", " ", phrase)
+        tokens = [w for w in phrase.split() if w not in _ORDER_STOP and w not in NUM_WORDS]
+        phrase = " ".join(tokens).strip()
+        if not phrase and not mods:
+            continue
+        lines.append({"qty": qty, "phrase": phrase, "modifiers": mods})
+    return lines

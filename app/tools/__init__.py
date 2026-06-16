@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.tools.base import ToolFn, ToolOutput, fail, ok
-from app.tools.cart import update_cart
+from app.tools.cart import order_items, update_cart
 from app.tools.escalation import escalate_to_human
 from app.tools.menu_rag import check_allergens, query_menu
 from app.tools.payments import create_payment
@@ -20,6 +20,7 @@ from app.tools.tracking import check_eta, track_order
 TOOLS: dict[str, ToolFn] = {
     "query_menu": query_menu,
     "check_allergens": check_allergens,
+    "order_items": order_items,
     "update_cart": update_cart,
     "book_table": book_table,
     "create_payment": create_payment,
@@ -55,8 +56,17 @@ TOOL_SPECS: list[dict[str, Any]] = [
         },
     },
     {
+        "name": "order_items",
+        "description": "Parse a free-text order (multiple items, quantities, modifiers) and add them all to the cart in one step.",
+        "input_schema": {
+            "type": "object",
+            "properties": {"text": {"type": "string", "description": "the customer's order phrasing"}},
+            "required": ["text"],
+        },
+    },
+    {
         "name": "update_cart",
-        "description": "Add/remove/set/clear cart items by SKU.",
+        "description": "Add/remove/set/clear a single cart item by SKU (used for taps/edits).",
         "input_schema": {
             "type": "object",
             "properties": {

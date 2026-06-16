@@ -1,9 +1,10 @@
 """Mock payment provider — simulates a tokenized link + webhook locally."""
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any
 
+from app.clock import now_utc
 from app.config import settings
 from app.providers.base import BasePSP
 from app.schemas.domain import PaymentLink
@@ -35,7 +36,7 @@ class MockPSP(BasePSP):
             provider="mock",
             amount_cents=amount_cents,
             reference=reference,
-            expires_at=datetime.utcnow() + timedelta(hours=1),
+            expires_at=now_utc() + timedelta(hours=1),
         )
 
     def parse_webhook(self, payload: dict[str, Any]) -> tuple[str, PaymentStatus]:

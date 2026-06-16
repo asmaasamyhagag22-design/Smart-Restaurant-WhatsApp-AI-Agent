@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
 
+from app.clock import now_utc
 from app.repositories.base import (
     ConversationRepo,
     CustomerRepo,
@@ -132,7 +132,7 @@ class MemoryConversationRepo(ConversationRepo):
         if rec:
             rec.state = state
             rec.status = status
-            rec.last_activity = datetime.utcnow()
+            rec.last_activity = now_utc()
 
     async def list(
         self,

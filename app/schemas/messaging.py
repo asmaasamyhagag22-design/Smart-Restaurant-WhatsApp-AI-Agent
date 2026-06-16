@@ -11,6 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.clock import now_utc
 from app.schemas.enums import MessageType
 
 
@@ -28,7 +29,7 @@ class InboundMessage(BaseModel):
     longitude: float | None = None
     # id of the button/list option the user tapped (interactive replies)
     interactive_id: str | None = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=now_utc)
     raw: dict[str, Any] = Field(default_factory=dict)
 
 

@@ -10,6 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from app.clock import now_utc
 from app.schemas.domain import Cart
 from app.schemas.enums import Intent, Lang
 from app.schemas.messaging import InboundMessage, OutboundMessage
@@ -30,7 +31,7 @@ class CustomerCtx(BaseModel):
 class Turn(BaseModel):
     role: Literal["user", "assistant", "system", "tool"]
     content: str
-    ts: datetime = Field(default_factory=datetime.utcnow)
+    ts: datetime = Field(default_factory=now_utc)
 
 
 class ToolCall(BaseModel):
