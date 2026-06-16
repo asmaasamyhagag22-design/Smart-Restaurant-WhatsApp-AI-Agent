@@ -63,9 +63,9 @@ async def seed_if_empty() -> None:
             TenantRecord(
                 id="",
                 slug=settings.default_tenant_slug,
-                name="مطعم زعفران",
+                name="مطعم بطة",
                 whatsapp_phone="+201000000000",
-                persona_name="زعفران",
+                persona_name="بطة",
                 voice_guidelines="ودود، مصري، مختصر، بيستخدم إيموجي بسيط",
                 enabled_payments=["cod", "card"],
             )

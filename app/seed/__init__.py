@@ -1,1 +1,1 @@
-"""Demo seed data: the Zaffran tenant + a bilingual menu, indexed for RAG."""
+"""Demo seed data: the Batta tenant + a bilingual menu, indexed for RAG."""

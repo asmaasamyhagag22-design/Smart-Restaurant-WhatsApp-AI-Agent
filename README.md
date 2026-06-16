@@ -85,7 +85,7 @@ piastres — so they can't drift or be hallucinated.
 | `app/security/` | PII redaction, prompt-injection defense, signatures |
 | `app/services/` | `pipeline.py` (spine), `response.py`, `telemetry.py`, `text.py` |
 | `app/api/` | `local_chat.py`, `health.py` (+ prod `webhooks.py`, `admin.py`) |
-| `app/seed/` | Demo tenant (مطعم زعفران) + bilingual menu |
+| `app/seed/` | Demo tenant (مطعم بطة) + bilingual menu |
 | `web/chat.html` | Local WhatsApp simulator UI |
 
 ## Providers — local default → production

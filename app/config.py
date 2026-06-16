@@ -107,7 +107,7 @@ class Settings(BaseSettings):
 
     # ── Security / multi-tenancy ──────────────────────────────────────
     admin_jwt_secret: str = "dev-admin-secret-change-me"
-    default_tenant_slug: str = "zaffran"
+    default_tenant_slug: str = "batta"
 
     @property
     def is_local(self) -> bool:

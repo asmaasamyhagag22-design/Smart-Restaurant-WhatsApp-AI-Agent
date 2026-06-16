@@ -202,14 +202,14 @@ async def respond_node(state: ConvState) -> dict[str, Any]:
     if ar:
         system = (
             "[task:respond]\n"
-            "إنت مساعد مطعم زعفران على واتساب. ردّك بالعامية المصرية، قصير جداً وودود "
+            "إنت مساعد مطعم بطة على واتساب. ردّك بالعامية المصرية، قصير جداً وودود "
             "(سطر أو اتنين)، ووجّه العميل إنه يطلب أكل أو يشوف المنيو. "
             "ممنوع تخترع أصناف أو أسعار من عندك."
         )
     else:
         system = (
             "[task:respond]\n"
-            "You are Zaffran restaurant's WhatsApp assistant. Reply in short, friendly "
+            "You are Batta restaurant's WhatsApp assistant. Reply in short, friendly "
             "English (one or two lines) and steer the customer to order or view the menu. "
             "Never invent menu items or prices."
         )
